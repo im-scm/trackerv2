@@ -44,8 +44,7 @@ const sampleData = [
         CNT_GQ_USD: "3.340,25",
         CNT_CG_USD: "3.265,80",
         CNT_VC_USD: "4.790,50"
-    },
-    // ... outras entradas ...
+    }
 ];
 
 // NYRIA 2025 colors
@@ -61,7 +60,6 @@ const chartColors = {
 };
 
 // --- Funções auxiliares ---
-
 function parseBrazilianNumber(value) {
     if (typeof value === 'number') return value;
     if (typeof value === 'string') {
@@ -75,7 +73,6 @@ function parseBrazilianNumber(value) {
 
 function parseLocalDate(dateStr) {
     if (!dateStr) return null;
-
     // Tratamento para string formato brasileiro dd/mm/aaaa
     if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
@@ -157,6 +154,7 @@ function processData(rawData) {
         });
         return processed;
     }).filter(row => row.Data && row.Data instanceof Date && !isNaN(row.Data.getTime()));
+
     processedData.sort((a, b) => a.Data - b.Data);
     console.log('Processing data - final:', processedData.length, 'registros válidos');
     return processedData;
@@ -170,9 +168,7 @@ function filterDataByDate(data, startDate, endDate) {
     });
 }
 
-
 // --- Funções de cálculo de métricas ---
-
 function calculatePercentageChange(oldValue, newValue) {
     if (!oldValue || oldValue === 0) return 0;
     return ((newValue - oldValue) / oldValue) * 100;
@@ -249,16 +245,17 @@ function updateChartMetrics(chartType, fields) {
     }
 }
 
-
 // --- Funções principais do Dashboard ---
-
 function createLineChart(canvasId, datasets, scales = null) {
     const ctx = document.getElementById(canvasId).getContext('2d');
     const labels = filteredData.map(d => formatDateBR(d.Data));
+
     if (charts[canvasId]) {
         charts[canvasId].destroy();
     }
+
     const defaultScales = { y: { title: { display: true, text: 'Valor' } } };
+
     const config = {
         type: 'line',
         data: { labels, datasets },
@@ -279,6 +276,7 @@ function createLineChart(canvasId, datasets, scales = null) {
             scales: scales || defaultScales
         }
     };
+
     charts[canvasId] = new Chart(ctx, config);
 }
 
@@ -286,50 +284,28 @@ function createAllCharts() {
     if (filteredData.length === 0) return;
     console.log('Criando gráficos com', filteredData.length, 'registros');
 
-    createLineChart('celuloseChart', [
-        {
-            label: 'Celulose EUR (€)',
-            data: filteredData.map(d => d.Celulose_EUR),
-            borderColor: chartColors.terracotta,
-            backgroundColor: chartColors.terracotta + '30',
-            yAxisID: 'y',
-            tension: 0.1
-        },
-        {
-            label: 'Celulose USD ($)',
-            data: filteredData.map(d => d.Celulose_USD),
-            borderColor: chartColors.terracottaLight,
-            backgroundColor: chartColors.terracottaLight + '30',
-            yAxisID: 'y1',
-            tension: 0.1
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-    ], {
+    // Celulose Chart
+    createLineChart('celuloseChart', [{
+        label: 'Celulose EUR (€)',
+        data: filteredData.map(d => d.Celulose_EUR),
+        borderColor: chartColors.terracotta,
+        backgroundColor: chartColors.terracotta + '30',
+        yAxisID: 'y',
+        tension: 0.1
+    }, {
+        label: 'Celulose USD ($)',
+        data: filteredData.map(d => d.Celulose_USD),
+        borderColor: chartColors.terracottaLight,
+        backgroundColor: chartColors.terracottaLight + '30',
+        yAxisID: 'y1',
+        tension: 0.1
+    }], {
         y: {
             type: 'linear',
             display: true,
             position: 'left',
             title: { display: true, text: 'EUR (€)', color: chartColors.terracotta },
-            ticks: { color: chartColors.terracotta 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            ticks: { color: chartColors.terracotta }
         },
         y1: {
             type: 'linear',
@@ -337,126 +313,70 @@ function createAllCharts() {
             position: 'right',
             title: { display: true, text: 'USD ($)', color: chartColors.terracottaLight },
             ticks: { color: chartColors.terracottaLight },
-            grid: { drawOnChartArea: false 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            grid: { drawOnChartArea: false }
+        }
     });
 
-    const tio2Data = filteredData.map(d => d.TIO2_EUR);
+    // TIO2 Chart
     createLineChart('tio2Chart', [{
         label: 'TIO2 EUR (€)',
-        data: tio2Data,
+        data: filteredData.map(d => d.TIO2_EUR),
         borderColor: chartColors.violet,
         backgroundColor: chartColors.violet + '30',
         tension: 0.1
     }]);
 
-    createLineChart('insumosChart', [
-        {
-            label: 'Melamina USD ($)',
-            data: filteredData.map(d => d.Melamina_USD),
-            borderColor: chartColors.brown,
-            backgroundColor: chartColors.brown + '30',
-            tension: 0.1
-        },
-        {
-            label: 'Ureia USD ($)',
-            data: filteredData.map(d => d.Ureia_USD),
-            borderColor: chartColors.olive,
-            backgroundColor: chartColors.olive + '30',
-            tension: 0.1
-        },
-        {
-            label: 'Metanol USD ($)',
-            data: filteredData.map(d => d.Metanol_USD),
-            borderColor: chartColors.stone,
-            backgroundColor: chartColors.stone + '30',
-            tension: 0.1
-        
+    // Insumos Chart
+    createLineChart('insumosChart', [{
+        label: 'Melamina USD ($)',
+        data: filteredData.map(d => d.Melamina_USD),
+        borderColor: chartColors.brown,
+        backgroundColor: chartColors.brown + '30',
+        tension: 0.1
+    }, {
+        label: 'Ureia USD ($)',
+        data: filteredData.map(d => d.Ureia_USD),
+        borderColor: chartColors.olive,
+        backgroundColor: chartColors.olive + '30',
+        tension: 0.1
+    }, {
+        label: 'Metanol USD ($)',
+        data: filteredData.map(d => d.Metanol_USD),
+        borderColor: chartColors.stone,
+        backgroundColor: chartColors.stone + '30',
+        tension: 0.1
+    }]);
 
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-    ]);
-
-    createLineChart('resinasChart', [
-        {
-            label: 'Resina UF BRL (R$)',
-            data: filteredData.map(d => d.Resina_UF_BRL),
-            borderColor: chartColors.terracotta,
-            backgroundColor: chartColors.terracotta + '30',
-            yAxisID: 'y',
-            tension: 0.1
-        },
-        {
-            label: 'Resina MF BRL (R$)',
-            data: filteredData.map(d => d.Resina_MF_BRL),
-            borderColor: chartColors.brown,
-            backgroundColor: chartColors.brown + '30',
-            yAxisID: 'y',
-            tension: 0.1
-        },
-        {
-            label: 'USDBRL_GPC',
-            data: filteredData.map(d => d.USDBRL_GPC),
-            borderColor: chartColors.violet,
-            backgroundColor: chartColors.violet + '30',
-            yAxisID: 'y1',
-            tension: 0.1,
-            borderDash: [5, 5]
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-    ], {
+    // Resinas Chart
+    createLineChart('resinasChart', [{
+        label: 'Resina UF BRL (R$)',
+        data: filteredData.map(d => d.Resina_UF_BRL),
+        borderColor: chartColors.terracotta,
+        backgroundColor: chartColors.terracotta + '30',
+        yAxisID: 'y',
+        tension: 0.1
+    }, {
+        label: 'Resina MF BRL (R$)',
+        data: filteredData.map(d => d.Resina_MF_BRL),
+        borderColor: chartColors.brown,
+        backgroundColor: chartColors.brown + '30',
+        yAxisID: 'y',
+        tension: 0.1
+    }, {
+        label: 'USDBRL_GPC',
+        data: filteredData.map(d => d.USDBRL_GPC),
+        borderColor: chartColors.violet,
+        backgroundColor: chartColors.violet + '30',
+        yAxisID: 'y1',
+        tension: 0.1,
+        borderDash: [5, 5]
+    }], {
         y: {
             type: 'linear',
             display: true,
             position: 'left',
             title: { display: true, text: 'BRL (R$)', color: chartColors.terracotta },
-            ticks: { color: chartColors.terracotta 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            ticks: { color: chartColors.terracotta }
         },
         y1: {
             type: 'linear',
@@ -464,91 +384,47 @@ function createAllCharts() {
             position: 'right',
             title: { display: true, text: 'USDBRL_GPC', color: chartColors.violet },
             ticks: { color: chartColors.violet },
-            grid: { drawOnChartArea: false 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            grid: { drawOnChartArea: false }
+        }
     });
 
-    createLineChart('moedasChart', [
-        {
-            label: 'USDBRL',
-            data: filteredData.map(d => d.USDBRL),
-            borderColor: chartColors.stone,
-            backgroundColor: chartColors.stone + '30',
-            yAxisID: 'y',
-            tension: 0.1
-        },
-        {
-            label: 'EURBRL',
-            data: filteredData.map(d => d.EURBRL),
-            borderColor: chartColors.terracotta,
-            backgroundColor: chartColors.terracotta + '30',
-            yAxisID: 'y',
-            tension: 0.1
-        },
-        {
-            label: 'USDBRL_GPC',
-            data: filteredData.map(d => d.USDBRL_GPC),
-            borderColor: chartColors.violet,
-            backgroundColor: chartColors.violet + '30',
-            yAxisID: 'y',
-            tension: 0.1,
-            hidden: true
-        },
-        {
-            label: 'CNYBRL',
-            data: filteredData.map(d => d.CNYBRL),
-            borderColor: chartColors.terracottaLight,
-            backgroundColor: chartColors.terracottaLight + '30',
-            yAxisID: 'y1',
-            tension: 0.1
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-    ], {
+    // Moedas Chart
+    createLineChart('moedasChart', [{
+        label: 'USDBRL',
+        data: filteredData.map(d => d.USDBRL),
+        borderColor: chartColors.stone,
+        backgroundColor: chartColors.stone + '30',
+        yAxisID: 'y',
+        tension: 0.1
+    }, {
+        label: 'EURBRL',
+        data: filteredData.map(d => d.EURBRL),
+        borderColor: chartColors.terracotta,
+        backgroundColor: chartColors.terracotta + '30',
+        yAxisID: 'y',
+        tension: 0.1
+    }, {
+        label: 'USDBRL_GPC',
+        data: filteredData.map(d => d.USDBRL_GPC),
+        borderColor: chartColors.violet,
+        backgroundColor: chartColors.violet + '30',
+        yAxisID: 'y',
+        tension: 0.1,
+        hidden: true
+    }, {
+        label: 'CNYBRL',
+        data: filteredData.map(d => d.CNYBRL),
+        borderColor: chartColors.terracottaLight,
+        backgroundColor: chartColors.terracottaLight + '30',
+        yAxisID: 'y1',
+        tension: 0.1
+    }], {
         y: {
             type: 'linear',
             display: true,
             position: 'left',
             title: { display: true, text: 'USD/EUR BRL', color: chartColors.stone },
-            ticks: { color: chartColors.stone 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            ticks: { color: chartColors.stone }
         },
         y1: {
             type: 'linear',
@@ -556,74 +432,32 @@ function createAllCharts() {
             position: 'right',
             title: { display: true, text: 'CNY BRL', color: chartColors.terracottaLight },
             ticks: { color: chartColors.terracottaLight },
-            grid: { drawOnChartArea: false 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            grid: { drawOnChartArea: false }
+        }
     });
 
-    createLineChart('freteImportChart', [
-        {
-            label: 'CNT Europa EUR (€)',
-            data: filteredData.map(d => d.CNT_EU_EUR),
-            borderColor: chartColors.violet,
-            backgroundColor: chartColors.violet + '30',
-            yAxisID: 'y',
-            tension: 0.1
-        },
-        {
-            label: 'CNT China USD ($)',
-            data: filteredData.map(d => d.CNT_CN_USD),
-            borderColor: chartColors.brown,
-            backgroundColor: chartColors.brown + '30',
-            yAxisID: 'y1',
-            tension: 0.1
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-    ], {
+    // Frete Import Chart
+    createLineChart('freteImportChart', [{
+        label: 'CNT Europa EUR (€)',
+        data: filteredData.map(d => d.CNT_EU_EUR),
+        borderColor: chartColors.violet,
+        backgroundColor: chartColors.violet + '30',
+        yAxisID: 'y',
+        tension: 0.1
+    }, {
+        label: 'CNT China USD ($)',
+        data: filteredData.map(d => d.CNT_CN_USD),
+        borderColor: chartColors.brown,
+        backgroundColor: chartColors.brown + '30',
+        yAxisID: 'y1',
+        tension: 0.1
+    }], {
         y: {
             type: 'linear',
             display: true,
             position: 'left',
             title: { display: true, text: 'EUR (€)', color: chartColors.violet },
-            ticks: { color: chartColors.violet 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            ticks: { color: chartColors.violet }
         },
         y1: {
             type: 'linear',
@@ -631,52 +465,30 @@ function createAllCharts() {
             position: 'right',
             title: { display: true, text: 'USD ($)', color: chartColors.brown },
             ticks: { color: chartColors.brown },
-            grid: { drawOnChartArea: false 
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-        
-
-    // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
+            grid: { drawOnChartArea: false }
+        }
     });
 
-    createLineChart('freteExportChart', [
-        {
-            label: 'CNT GQ USD ($)',
-            data: filteredData.map(d => d.CNT_GQ_USD),
-            borderColor: chartColors.olive,
-            backgroundColor: chartColors.olive + '30',
-            tension: 0.1
-        },
-        {
-            label: 'CNT CG USD ($)',
-            data: filteredData.map(d => d.CNT_CG_USD),
-            borderColor: chartColors.brown,
-            backgroundColor: chartColors.brown + '30',
-            tension: 0.1
-        },
-        {
-            label: 'CNT VC USD ($)',
-            data: filteredData.map(d => d.CNT_VC_USD),
-            borderColor: chartColors.terracotta,
-            backgroundColor: chartColors.terracotta + '30',
-            tension: 0.1
-        
+    // Frete Export Chart
+    createLineChart('freteExportChart', [{
+        label: 'CNT GQ USD ($)',
+        data: filteredData.map(d => d.CNT_GQ_USD),
+        borderColor: chartColors.olive,
+        backgroundColor: chartColors.olive + '30',
+        tension: 0.1
+    }, {
+        label: 'CNT CG USD ($)',
+        data: filteredData.map(d => d.CNT_CG_USD),
+        borderColor: chartColors.brown,
+        backgroundColor: chartColors.brown + '30',
+        tension: 0.1
+    }, {
+        label: 'CNT VC USD ($)',
+        data: filteredData.map(d => d.CNT_VC_USD),
+        borderColor: chartColors.terracotta,
+        backgroundColor: chartColors.terracotta + '30',
+        tension: 0.1
+    }]);
 
     // Atualizar métricas de todos os gráficos
     updateChartMetrics('celulose', 'Celulose_EUR');
@@ -686,8 +498,6 @@ function createAllCharts() {
     updateChartMetrics('moedas', 'USDBRL');
     updateChartMetrics('freteimport', 'CNT_EU_EUR');
     updateChartMetrics('freteexport', 'CNT_GQ_USD');
-}
-    ]);
 }
 
 function updateKPIBoxes() {
@@ -763,7 +573,6 @@ function updateLastUploadInfo() {
 function updateDashboard() {
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
-
     let startDate = null;
     let endDate = null;
 
@@ -788,7 +597,6 @@ function updateDashboard() {
     console.log('Dashboard atualizado - registros filtrados:', filteredData.length);
 
     updateKPIBoxes();
-
     setTimeout(() => {
         createAllCharts();
     }, 100);
@@ -799,13 +607,15 @@ function handleFileUpload(file) {
         console.error('No file provided');
         return;
     }
+
     if (!file.name.match(/\.(xlsx|xls)$/i)) {
         showUploadStatus('Formato de arquivo inválido. Use .xlsx ou .xls', 'error');
         return;
     }
-    showUploadStatus('Processando arquivo...', 'processing');
 
+    showUploadStatus('Processando arquivo...', 'processing');
     const reader = new FileReader();
+
     reader.onload = function(e) {
         try {
             const data = new Uint8Array(e.target.result);
@@ -823,7 +633,6 @@ function handleFileUpload(file) {
             console.log('Primeiro registro:', jsonData[0]);
 
             const processedData = processData(jsonData);
-
             if (processedData.length === 0) {
                 showUploadStatus('Nenhum dado válido encontrado no arquivo', 'error');
                 return;
@@ -833,13 +642,14 @@ function handleFileUpload(file) {
             updateLastUploadInfo();
             updateDateFilters();
             updateDashboard();
-
             showUploadStatus(`Arquivo processado com sucesso! ${processedData.length} registros carregados.`, 'success');
+
         } catch (error) {
             console.error('Error processing file:', error);
             showUploadStatus(`Erro ao processar arquivo: ${error.message}`, 'error');
         }
     };
+
     reader.onerror = function() {
         showUploadStatus('Erro ao ler arquivo', 'error');
     };
@@ -872,7 +682,6 @@ function fetchAndLoadExcel(url) {
             updateLastUploadInfo();
             updateDateFilters();
             updateDashboard();
-
             showUploadStatus(`Arquivo database carregado com sucesso! ${globalData.length} registros.`, 'success');
         })
         .catch(error => {
@@ -883,16 +692,19 @@ function fetchAndLoadExcel(url) {
 
 function initializeApp() {
     console.log('Inicializando app...');
+
     if (typeof XLSX === 'undefined') {
         showUploadStatus('Erro: Biblioteca XLSX não carregada', 'error');
         console.error('XLSX library not loaded');
         return;
     }
+
     if (typeof Chart === 'undefined') {
         showUploadStatus('Erro: Biblioteca Chart.js não carregada', 'error');
         console.error('Chart.js library not loaded');
         return;
     }
+
     // Inicia com dados de exemplo
     console.log('Carregando dados de exemplo...');
     globalData = processData(sampleData);
@@ -905,6 +717,7 @@ function initializeApp() {
 
 function setupEventListeners() {
     console.log('Configurando event listeners...');
+
     const uploadBtn = document.getElementById('uploadBtn');
     const fileInput = document.getElementById('fileInput');
     const uploadZone = document.getElementById('uploadZone');
@@ -916,6 +729,7 @@ function setupEventListeners() {
             e.preventDefault();
             fileInput.click();
         };
+
         fileInput.onchange = e => {
             if (e.target.files.length > 0) {
                 handleFileUpload(e.target.files[0]);
@@ -929,14 +743,17 @@ function setupEventListeners() {
             e.preventDefault();
             fileInput.click();
         };
+
         uploadZone.ondragover = e => {
             e.preventDefault();
             uploadZone.classList.add('dragover');
         };
+
         uploadZone.ondragleave = e => {
             e.preventDefault();
             uploadZone.classList.remove('dragover');
         };
+
         uploadZone.ondrop = e => {
             e.preventDefault();
             uploadZone.classList.remove('dragover');
@@ -951,6 +768,7 @@ function setupEventListeners() {
 
     function setupDateInputHandlers(input) {
         if (!input) return;
+
         input.oninput = e => {
             if (!validateDateInput(e.target.value)) {
                 e.target.style.borderColor = '#c0152f';
@@ -958,6 +776,7 @@ function setupEventListeners() {
                 e.target.style.borderColor = '';
             }
         };
+
         input.onblur = e => {
             const date = parseDateBR(e.target.value);
             if (date) {
@@ -968,6 +787,7 @@ function setupEventListeners() {
                 e.target.style.borderColor = '#c0152f';
             }
         };
+
         input.onkeypress = e => {
             if (e.key === 'Enter') e.target.blur();
         };
