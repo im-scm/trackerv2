@@ -59,6 +59,41 @@ const chartColors = {
     beige: '#F5F5DC'
 };
 
+// Configuração das séries para cada gráfico
+const chartSeriesConfig = {
+    'celulose': [
+        { field: 'Celulose_EUR', label: 'EUR', color: '#B34A3A' },
+        { field: 'Celulose_USD', label: 'USD', color: '#CD853F' }
+    ],
+    'tio2': [
+        { field: 'TIO2_EUR', label: 'EUR', color: '#4A148C' }
+    ],
+    'insumos': [
+        { field: 'Melamina_USD', label: 'Melamina', color: '#8B4513' },
+        { field: 'Ureia_USD', label: 'Ureia', color: '#6B8E23' },
+        { field: 'Metanol_USD', label: 'Metanol', color: '#708090' }
+    ],
+    'resinas': [
+        { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A' },
+        { field: 'Resina_MF_BRL', label: 'MF', color: '#8B4513' },
+        { field: 'USDBRL_GPC', label: 'GPC', color: '#4A148C' }
+    ],
+    'moedas': [
+        { field: 'USDBRL', label: 'USD', color: '#708090' },
+        { field: 'EURBRL', label: 'EUR', color: '#B34A3A' },
+        { field: 'CNYBRL', label: 'CNY', color: '#CD853F' }
+    ],
+    'freteimport': [
+        { field: 'CNT_EU_EUR', label: 'Europa', color: '#4A148C' },
+        { field: 'CNT_CN_USD', label: 'China', color: '#8B4513' }
+    ],
+    'freteexport': [
+        { field: 'CNT_GQ_USD', label: 'GQ', color: '#6B8E23' },
+        { field: 'CNT_CG_USD', label: 'CG', color: '#8B4513' },
+        { field: 'CNT_VC_USD', label: 'VC', color: '#B34A3A' }
+    ]
+};
+
 // --- Funções auxiliares ---
 function parseBrazilianNumber(value) {
     if (typeof value === 'number') return value;
@@ -217,32 +252,53 @@ function calculatePeriodMetrics(data, field) {
     return { period, ytd, mom };
 }
 
-function updateChartMetrics(chartType, fields) {
+function updateChartMetrics(chartType) {
     if (filteredData.length === 0) return;
 
-    // Calcular métricas para o(s) campo(s) principal(is) do gráfico
-    const primaryField = Array.isArray(fields) ? fields[0] : fields;
-    const metrics = calculatePeriodMetrics(filteredData, primaryField);
+    const seriesConfig = chartSeriesConfig[chartType];
+    if (!seriesConfig) return;
 
-    // Atualizar os elementos HTML
-    const periodEl = document.getElementById(`${chartType}-period`);
-    const ytdEl = document.getElementById(`${chartType}-ytd`);
-    const momEl = document.getElementById(`${chartType}-mom`);
+    // Limpar o container de métricas
+    const metricsContainer = document.getElementById(`${chartType}Metrics`);
+    if (!metricsContainer) return;
 
-    if (periodEl) {
-        periodEl.textContent = formatPercentage(metrics.period);
-        periodEl.className = `metric-value ${getMetricClass(metrics.period)}`;
-    }
+    // Criar HTML para múltiplas séries
+    let metricsHTML = '';
 
-    if (ytdEl) {
-        ytdEl.textContent = formatPercentage(metrics.ytd);
-        ytdEl.className = `metric-value ${getMetricClass(metrics.ytd)}`;
-    }
+    // Header com os nomes das séries
+    metricsHTML += '<div class="metrics-header">';
+    seriesConfig.forEach(series => {
+        metricsHTML += `<div class="series-header" style="color: ${series.color}">${series.label}</div>`;
+    });
+    metricsHTML += '</div>';
 
-    if (momEl) {
-        momEl.textContent = formatPercentage(metrics.mom);
-        momEl.className = `metric-value ${getMetricClass(metrics.mom)}`;
-    }
+    // Métricas para cada tipo (Período, YTD, MOM)
+    const metricTypes = [
+        { key: 'period', label: 'Período' },
+        { key: 'ytd', label: 'YTD' },
+        { key: 'mom', label: 'MOM' }
+    ];
+
+    metricTypes.forEach(metricType => {
+        metricsHTML += `<div class="metric-row">`;
+        metricsHTML += `<div class="metric-row-label">${metricType.label}</div>`;
+
+        seriesConfig.forEach(series => {
+            const metrics = calculatePeriodMetrics(filteredData, series.field);
+            const value = metrics[metricType.key];
+            const cssClass = getMetricClass(value);
+
+            metricsHTML += `
+                <div class="metric-cell">
+                    <span class="metric-value ${cssClass}">${formatPercentage(value)}</span>
+                </div>
+            `;
+        });
+
+        metricsHTML += '</div>';
+    });
+
+    metricsContainer.innerHTML = metricsHTML;
 }
 
 // --- Funções principais do Dashboard ---
@@ -491,13 +547,13 @@ function createAllCharts() {
     }]);
 
     // Atualizar métricas de todos os gráficos
-    updateChartMetrics('celulose', 'Celulose_EUR');
-    updateChartMetrics('tio2', 'TIO2_EUR');
-    updateChartMetrics('insumos', 'Melamina_USD');
-    updateChartMetrics('resinas', 'Resina_UF_BRL');
-    updateChartMetrics('moedas', 'USDBRL');
-    updateChartMetrics('freteimport', 'CNT_EU_EUR');
-    updateChartMetrics('freteexport', 'CNT_GQ_USD');
+    updateChartMetrics('celulose');
+    updateChartMetrics('tio2');
+    updateChartMetrics('insumos');
+    updateChartMetrics('resinas');
+    updateChartMetrics('moedas');
+    updateChartMetrics('freteimport');
+    updateChartMetrics('freteexport');
 }
 
 function updateKPIBoxes() {

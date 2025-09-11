@@ -553,7 +553,7 @@ font-size: var(--font-size-xl);
 font-weight: var(--font-weight-semibold);
 }
 
-/* ----- NOVO LAYOUT DE GRÁFICOS COM MÉTRICAS ----- */
+/* ----- NOVO LAYOUT DE GRÁFICOS COM MÉTRICAS PARA MÚLTIPLAS SÉRIES ----- */
 
 /* Container para cada gráfico em linha com métricas */
 .chart-row {
@@ -580,19 +580,19 @@ min-width: 0; /* Permite que o flex shrink funcione */
 box-shadow: var(--shadow-md);
 }
 
-/* Box de métricas ao lado do gráfico */
+/* Box de métricas ao lado do gráfico - AGORA COM 270px para todas as séries */
 .metrics-box {
-width: 110px;
+width: 270px; /* Largura fixa para todas as métricas - acomoda até 3 séries */
 flex-shrink: 0;
 display: flex;
 flex-direction: column;
-gap: var(--space-12);
+gap: var(--space-8);
 background: var(--color-surface);
 border: 1px solid var(--color-card-border);
 border-radius: var(--radius-lg);
-padding: var(--space-16);
+padding: var(--space-12);
 box-shadow: var(--shadow-sm);
-align-self: center;
+align-self: flex-start;
 height: fit-content;
 }
 
@@ -600,38 +600,72 @@ height: fit-content;
 box-shadow: var(--shadow-md);
 }
 
-/* Item individual de métrica */
-.metric-item {
-display: flex;
-flex-direction: column;
-align-items: center;
-text-align: center;
+/* Header com nomes das séries */
+.metrics-header {
+display: grid;
+grid-template-columns: 70px repeat(3, 1fr); /* Label + 3 colunas para séries */
 gap: var(--space-4);
-padding: var(--space-8);
-background: var(--color-secondary);
-border-radius: var(--radius-base);
-transition: background var(--duration-fast) var(--ease-standard);
+margin-bottom: var(--space-8);
+padding-bottom: var(--space-8);
+border-bottom: 1px solid var(--color-border);
 }
 
-.metric-item:hover {
-background: var(--color-secondary-hover);
+.series-header {
+font-size: var(--font-size-xs);
+font-weight: var(--font-weight-bold);
+text-align: center;
+text-transform: uppercase;
+letter-spacing: 0.05em;
+padding: var(--space-4);
+}
+
+/* Primeira coluna vazia para alinhar com os labels das métricas */
+.metrics-header::before {
+content: '';
+}
+
+/* Linha de métrica (Período, YTD, MOM) */
+.metric-row {
+display: grid;
+grid-template-columns: 70px repeat(3, 1fr); /* Label + 3 colunas para valores */
+gap: var(--space-4);
+align-items: center;
+margin-bottom: var(--space-4);
 }
 
 /* Label da métrica (Período, YTD, MOM) */
-.metric-label {
+.metric-row-label {
 font-size: var(--font-size-xs);
 font-weight: var(--font-weight-medium);
 color: var(--color-text-secondary);
 text-transform: uppercase;
 letter-spacing: 0.05em;
+padding: var(--space-4);
+text-align: right;
+}
+
+/* Célula individual de métrica */
+.metric-cell {
+display: flex;
+justify-content: center;
+align-items: center;
+padding: var(--space-4);
+background: var(--color-secondary);
+border-radius: var(--radius-base);
+transition: background var(--duration-fast) var(--ease-standard);
+min-height: 24px;
+}
+
+.metric-cell:hover {
+background: var(--color-secondary-hover);
 }
 
 /* Valor da métrica */
 .metric-value {
-font-size: var(--font-size-sm);
+font-size: var(--font-size-xs);
 font-weight: var(--font-weight-bold);
-color: var(--color-text);
 font-family: var(--font-family-mono);
+text-align: center;
 }
 
 /* Cores específicas para valores positivos/negativos */
@@ -652,56 +686,39 @@ color: var(--color-text);
 border-left: 4px solid var(--nyria-terracotta);
 }
 
-#celuloseMetrics .metric-item {
-background: rgba(179, 74, 58, 0.1);
-}
-
 #tio2Metrics {
 border-left: 4px solid var(--nyria-violet);
-}
-
-#tio2Metrics .metric-item {
-background: rgba(74, 20, 140, 0.1);
 }
 
 #insumosMetrics {
 border-left: 4px solid var(--nyria-brown);
 }
 
-#insumosMetrics .metric-item {
-background: rgba(139, 69, 19, 0.1);
-}
-
 #resinasMetrics {
 border-left: 4px solid var(--nyria-terracotta-light);
-}
-
-#resinasMetrics .metric-item {
-background: rgba(205, 133, 63, 0.1);
 }
 
 #moedasMetrics {
 border-left: 4px solid var(--nyria-stone);
 }
 
-#moedasMetrics .metric-item {
-background: rgba(112, 128, 144, 0.1);
-}
-
 #freteImportMetrics {
 border-left: 4px solid var(--nyria-violet-medium);
-}
-
-#freteImportMetrics .metric-item {
-background: rgba(123, 31, 162, 0.1);
 }
 
 #freteExportMetrics {
 border-left: 4px solid var(--nyria-olive);
 }
 
-#freteExportMetrics .metric-item {
-background: rgba(107, 142, 35, 0.1);
+/* Para gráficos com menos de 3 séries - esconder colunas vazias */
+.metrics-box[data-series="1"] .metrics-header,
+.metrics-box[data-series="1"] .metric-row {
+grid-template-columns: 70px 1fr 0 0;
+}
+
+.metrics-box[data-series="2"] .metrics-header,
+.metrics-box[data-series="2"] .metric-row {
+grid-template-columns: 70px repeat(2, 1fr) 0;
 }
 
 /* Responsive adjustments para mobile */
@@ -713,14 +730,24 @@ gap: var(--space-12);
 
 .metrics-box {
 width: 100%;
-flex-direction: row;
-justify-content: space-around;
-padding: var(--space-12);
 }
 
-.metric-item {
-flex: 1;
-min-width: 70px;
+.metrics-header,
+.metric-row {
+grid-template-columns: 50px repeat(3, 1fr);
+gap: var(--space-2);
+}
+
+.metric-row-label {
+font-size: 10px;
+}
+
+.series-header {
+font-size: 10px;
+}
+
+.metric-value {
+font-size: 10px;
 }
 
 .chart-wrapper {
@@ -731,20 +758,25 @@ height: 300px;
 /* Ajustes para tablets */
 @media (max-width: 1024px) and (min-width: 769px) {
 .metrics-box {
-width: 100px;
-padding: var(--space-12);
+width: 240px;
+padding: var(--space-10);
 }
 
-.metric-item {
-padding: var(--space-6);
+.metrics-header,
+.metric-row {
+gap: var(--space-2);
 }
 
-.metric-label {
+.metric-row-label {
+font-size: 10px;
+}
+
+.series-header {
 font-size: 10px;
 }
 
 .metric-value {
-font-size: var(--font-size-xs);
+font-size: 10px;
 }
 }
 
