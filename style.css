@@ -682,33 +682,6 @@ color: var(--color-text);
 }
 
 /* Cores específicas para cada gráfico baseadas na paleta NYRIA 2025 */
-#celuloseMetrics {
-border-left: 4px solid var(--nyria-terracotta);
-}
-
-#tio2Metrics {
-border-left: 4px solid var(--nyria-violet);
-}
-
-#insumosMetrics {
-border-left: 4px solid var(--nyria-brown);
-}
-
-#resinasMetrics {
-border-left: 4px solid var(--nyria-terracotta-light);
-}
-
-#moedasMetrics {
-border-left: 4px solid var(--nyria-stone);
-}
-
-#freteImportMetrics {
-border-left: 4px solid var(--nyria-violet-medium);
-}
-
-#freteExportMetrics {
-border-left: 4px solid var(--nyria-olive);
-}
 
 /* Para gráficos com menos de 3 séries - esconder colunas vazias */
 .metrics-box[data-series="1"] .metrics-header,

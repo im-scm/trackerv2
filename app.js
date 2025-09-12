@@ -69,9 +69,9 @@ const chartSeriesConfig = {
         { field: 'TIO2_EUR', label: 'EUR', color: '#4A148C' }
     ],
     'insumos': [
-        { field: 'Melamina_USD', label: 'Melamina', color: '#8B4513' },
-        { field: 'Ureia_USD', label: 'Ureia', color: '#6B8E23' },
-        { field: 'Metanol_USD', label: 'Metanol', color: '#708090' }
+        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513' },
+        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23' },
+        { field: 'Metanol_USD', label: 'MET', color: '#708090' }
     ],
     'resinas': [
         { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A' },
@@ -226,26 +226,31 @@ function getMetricClass(value) {
 function calculatePeriodMetrics(data, field) {
     if (!data || data.length === 0) return { period: null, ytd: null, mom: null };
 
-    // Período: primeiro vs último do filtro
-    const firstValue = data[0][field];
-    const lastValue = data[data.length - 1][field];
+    // Filtrar dados válidos (não nulos, não zero, não undefined)
+    const validData = data.filter(d => d[field] != null && d[field] !== 0 && !isNaN(d[field]));
+
+    if (validData.length === 0) return { period: null, ytd: null, mom: null };
+
+    // Período: primeiro vs último dos dados válidos
+    const firstValue = validData[0][field];
+    const lastValue = validData[validData.length - 1][field];
     const period = calculatePercentageChange(firstValue, lastValue);
 
-    // YTD: primeiro valor do ano corrente vs último valor
+    // YTD: primeiro valor do ano corrente vs último valor (apenas dados válidos)
     const currentYear = new Date().getFullYear();
-    const ytdData = data.filter(d => d.Data.getFullYear() === currentYear);
+    const ytdValidData = validData.filter(d => d.Data.getFullYear() === currentYear);
     let ytd = null;
 
-    if (ytdData.length > 1) {
-        const firstYtdValue = ytdData[0][field];
-        const lastYtdValue = ytdData[ytdData.length - 1][field];
+    if (ytdValidData.length > 1) {
+        const firstYtdValue = ytdValidData[0][field];
+        const lastYtdValue = ytdValidData[ytdValidData.length - 1][field];
         ytd = calculatePercentageChange(firstYtdValue, lastYtdValue);
     }
 
-    // MOM: penúltimo vs último valor
+    // MOM: penúltimo vs último valor (apenas dados válidos)
     let mom = null;
-    if (data.length > 1) {
-        const secondLastValue = data[data.length - 2][field];
+    if (validData.length > 1) {
+        const secondLastValue = validData[validData.length - 2][field];
         mom = calculatePercentageChange(secondLastValue, lastValue);
     }
 
@@ -274,7 +279,7 @@ function updateChartMetrics(chartType) {
 
     // Métricas para cada tipo (Período, YTD, MOM)
     const metricTypes = [
-        { key: 'period', label: 'Período' },
+        { key: 'period', label: 'ALL' },
         { key: 'ytd', label: 'YTD' },
         { key: 'mom', label: 'MOM' }
     ];
