@@ -325,26 +325,281 @@ function updateChartMetrics(chartType) {
     metricsContainer.setAttribute('data-series', seriesConfig.length);
 }
 
-// Resto das funções do sistema original continuam aqui...
-// (Upload, criação de gráficos, etc.)
+// --- Funções de Upload e Manipulação de Arquivos ---
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        processFile(file);
+    }
+}
 
-// Exemplo das demais funções essenciais
+function dropHandler(event) {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        processFile(files[0]);
+    }
+    event.target.classList.remove('dragover');
+}
+
+function dragOverHandler(event) {
+    event.preventDefault();
+}
+
+function dragEnterHandler(event) {
+    event.preventDefault();
+    event.target.classList.add('dragover');
+}
+
+function dragLeaveHandler(event) {
+    event.target.classList.remove('dragover');
+}
+
+function processFile(file) {
+    if (!file) return;
+
+    const statusElement = document.getElementById('uploadStatus');
+    statusElement.className = 'upload-status processing';
+    statusElement.textContent = 'Processando arquivo...';
+    statusElement.classList.remove('hidden');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Assumir que os dados estão na primeira planilha
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+
+            // Converter para JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length === 0) {
+                throw new Error('Arquivo vazio ou formato inválido');
+            }
+
+            // Processar os dados
+            globalData = processData(jsonData);
+            filteredData = [...globalData];
+
+            // Atualizar a interface
+            updateAllCharts();
+            updateAllMetrics();
+            updateKPIs();
+
+            statusElement.className = 'upload-status success';
+            statusElement.textContent = `Arquivo carregado com sucesso! ${globalData.length} registros processados.`;
+
+            console.log('Dados carregados:', globalData.length, 'registros');
+
+        } catch (error) {
+            console.error('Erro ao processar arquivo:', error);
+            statusElement.className = 'upload-status error';
+            statusElement.textContent = `Erro ao processar arquivo: ${error.message}`;
+        }
+    };
+
+    reader.onerror = function() {
+        statusElement.className = 'upload-status error';
+        statusElement.textContent = 'Erro ao ler o arquivo';
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+// --- Funções de Criação de Gráficos ---
 function createLineChart(chartId, seriesData) {
-    console.log(`Criando gráfico: ${chartId}`, seriesData);
-    // Implementação do Chart.js ou biblioteca de gráficos
+    const ctx = document.getElementById(chartId);
+    if (!ctx) return;
+
+    // Destruir gráfico existente se houver
+    if (charts[chartId]) {
+        charts[chartId].destroy();
+    }
+
+    // Preparar datasets
+    const datasets = seriesData.map(series => ({
+        label: series.label,
+        data: filteredData.map(row => ({
+            x: formatDateBR(row.Data),
+            y: row[series.field]
+        })),
+        borderColor: series.color,
+        backgroundColor: series.color + '20',
+        tension: 0.4,
+        fill: false
+    }));
+
+    // Criar novo gráfico
+    charts[chartId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Data'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Valor'
+                    }
+                }
+            }
+        }
+    });
 }
 
+function updateAllCharts() {
+    if (filteredData.length === 0) return;
+
+    Object.keys(chartSeriesConfig).forEach(chartType => {
+        const chartId = getChartId(chartType);
+        const seriesConfig = chartSeriesConfig[chartType];
+        createLineChart(chartId, seriesConfig);
+    });
+}
+
+function getChartId(chartType) {
+    const chartIdMap = {
+        'celulose': 'celuloseChart',
+        'tio2': 'tio2Chart',
+        'insumos': 'insumosChart',
+        'resinas': 'resinasChart',
+        'moedas': 'moedasChart',
+        'freteimport': 'freteImportChart',
+        'freteexport': 'freteExportChart'
+    };
+    return chartIdMap[chartType] || chartType + 'Chart';
+}
+
+function updateAllMetrics() {
+    Object.keys(chartSeriesConfig).forEach(chartType => {
+        updateChartMetrics(chartType);
+    });
+}
+
+// --- Funções de KPI ---
 function updateKPIs() {
-    console.log('Atualizando KPIs...');
-    // Implementação da atualização dos KPIs
+    if (filteredData.length === 0) return;
+
+    const lastRow = filteredData[filteredData.length - 1];
+
+    // Celulose KPI
+    updateKPIBox('celuloseKPI', [
+        { label: 'EUR', value: lastRow.Celulose_EUR },
+        { label: 'USD', value: lastRow.Celulose_USD }
+    ]);
+
+    // TiO2 KPI
+    updateKPIBox('tio2KPI', [
+        { label: 'EUR', value: lastRow.TIO2_EUR }
+    ]);
+
+    // Resinas KPI
+    updateKPIBox('resinasKPI', [
+        { label: 'UF', value: lastRow.Resina_UF_BRL },
+        { label: 'MF', value: lastRow.Resina_MF_BRL }
+    ]);
+
+    // Moedas KPI
+    updateKPIBox('moedasKPI', [
+        { label: 'USD', value: lastRow.USDBRL },
+        { label: 'EUR', value: lastRow.EURBRL }
+    ]);
+
+    // Frete KPI (valores médios dos últimos dados válidos)
+    const freteImportValue = (lastRow.CNT_EU_EUR || 0) + (lastRow.CNT_CN_USD || 0);
+    const freteExportValue = (lastRow.CNT_GQ_USD || 0) + (lastRow.CNT_CG_USD || 0) + (lastRow.CNT_VC_USD || 0);
+
+    updateKPIBox('freteKPI', [
+        { label: 'Import', value: freteImportValue > 0 ? freteImportValue / 2 : 0 },
+        { label: 'Export', value: freteExportValue > 0 ? freteExportValue / 3 : 0 }
+    ]);
 }
 
-function handleFileUpload(file) {
-    console.log('Upload de arquivo:', file.name);
-    // Implementação do upload e processamento de arquivos
+function updateKPIBox(kpiId, values) {
+    const kpiElement = document.getElementById(kpiId);
+    if (!kpiElement) return;
+
+    let html = '';
+    values.forEach(item => {
+        html += `
+            <div class="kpi-item">
+                <span class="currency">${item.label}</span>
+                <span class="value">${formatNumber(item.value)}</span>
+            </div>
+        `;
+    });
+
+    kpiElement.innerHTML = html;
 }
 
-// Inicialização
+// --- Funções de Filtro por Data ---
+function setupDateFilters() {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (startDateInput && endDateInput) {
+        startDateInput.addEventListener('change', applyDateFilters);
+        endDateInput.addEventListener('change', applyDateFilters);
+    }
+}
+
+function applyDateFilters() {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (!startDateInput || !endDateInput) return;
+
+    const startDateStr = startDateInput.value.trim();
+    const endDateStr = endDateInput.value.trim();
+
+    let startDate = null;
+    let endDate = null;
+
+    if (startDateStr && validateDateInput(startDateStr)) {
+        startDate = parseDateBR(startDateStr);
+    }
+
+    if (endDateStr && validateDateInput(endDateStr)) {
+        endDate = parseDateBR(endDateStr);
+    }
+
+    // Aplicar filtro
+    if (startDate || endDate) {
+        filteredData = filterDataByDate(globalData, startDate, endDate);
+    } else {
+        filteredData = [...globalData];
+    }
+
+    // Atualizar interface
+    updateAllCharts();
+    updateAllMetrics();
+    updateKPIs();
+
+    console.log('Filtro aplicado:', filteredData.length, 'registros');
+}
+
+// --- Inicialização ---
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard inicializado');
 
@@ -352,22 +607,24 @@ document.addEventListener('DOMContentLoaded', function() {
     globalData = processData(sampleData);
     filteredData = [...globalData];
 
-    // Criar todos os gráficos
-    Object.keys(chartSeriesConfig).forEach(chartType => {
-        console.log(`Inicializando gráfico: ${chartType}`);
-        // createChart logic aqui
-    });
+    // Configurar filtros de data
+    setupDateFilters();
 
-    // Atualizar todas as métricas
-    Object.keys(chartSeriesConfig).forEach(chartType => {
-        updateChartMetrics(chartType);
-    });
+    // Criar gráficos iniciais
+    updateAllCharts();
 
-    // Configurar event listeners
-    setupEventListeners();
+    // Atualizar métricas
+    updateAllMetrics();
+
+    // Atualizar KPIs
+    updateKPIs();
+
+    console.log('Dashboard pronto com', globalData.length, 'registros de exemplo');
 });
 
-function setupEventListeners() {
-    // Event listeners para filtros de data, upload, etc.
-    console.log('Event listeners configurados');
-}
+// --- Exposição de funções globais para o HTML ---
+window.handleFileSelect = handleFileSelect;
+window.dropHandler = dropHandler;
+window.dragOverHandler = dragOverHandler;
+window.dragEnterHandler = dragEnterHandler;
+window.dragLeaveHandler = dragLeaveHandler;
