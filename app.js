@@ -642,7 +642,7 @@ function updateKPIs() {
     // Frete Exportação KPI (CORRIGIDO)
     const freteExportValue = ((lastRow.CNT_GQ_USD || 0) + (lastRow.CNT_CG_USD || 0) + (lastRow.CNT_VC_USD || 0)) / 3;
     updateKPIBox('freteExportKPI', [
-        { label: 'Média', value: freteExportValue },
+        { label: 'CG', value: lastRow.CNT_CG_USD },
         { label: 'GQ', value: lastRow.CNT_GQ_USD || 0 }
     ]);
 }
