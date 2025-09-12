@@ -66,7 +66,7 @@ const chartSeriesConfig = {
         { field: 'Celulose_EUR', label: 'EUR', color: '#B34A3A', yAxisID: 'y1' }  // Eixo secundário
     ],
     'tio2': [
-        { field: 'TIO2_EUR', label: 'EUR', color: '#4A148C', yAxisID: 'y' }
+        { field: 'TIO2_EUR', label: 'TIO2', color: '#4A148C', yAxisID: 'y' }
     ],
     'insumos': [
         { field: 'Ureia_USD', label: 'URE', color: '#6B8E23', yAxisID: 'y' },      // Eixo primário
@@ -76,7 +76,7 @@ const chartSeriesConfig = {
     'resinas': [
         { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A', yAxisID: 'y' },   // Eixo primário
         { field: 'Resina_MF_BRL', label: 'MF', color: '#8B4513', yAxisID: 'y' },   // Eixo primário
-        { field: 'USDBRL_GPC', label: 'GPC', color: '#4A148C', yAxisID: 'y1' }     // Eixo secundário
+        { field: 'USDBRL_GPC', label: 'USD', color: '#4A148C', yAxisID: 'y1' }     // Eixo secundário
     ],
     'moedas': [
         { field: 'USDBRL', label: 'USD', color: '#708090', yAxisID: 'y' },         // Eixo primário
@@ -84,8 +84,8 @@ const chartSeriesConfig = {
         { field: 'CNYBRL', label: 'CNY', color: '#CD853F', yAxisID: 'y1' }         // Eixo secundário
     ],
     'freteimport': [
-        { field: 'CNT_EU_EUR', label: 'Europa', color: '#4A148C', yAxisID: 'y' },   // Eixo primário
-        { field: 'CNT_CN_USD', label: 'China', color: '#8B4513', yAxisID: 'y1' }    // Eixo secundário
+        { field: 'CNT_EU_EUR', label: 'EU', color: '#4A148C', yAxisID: 'y' },   // Eixo primário
+        { field: 'CNT_CN_USD', label: 'CN', color: '#8B4513', yAxisID: 'y1' }    // Eixo secundário
     ],
     'freteexport': [
         { field: 'CNT_GQ_USD', label: 'GQ', color: '#6B8E23', yAxisID: 'y' },
@@ -624,7 +624,7 @@ function updateKPIs() {
 
     // TiO2 KPI
     updateKPIBox('tio2KPI', [
-        { label: 'EUR', value: lastRow.TIO2_EUR }
+        { label: 'TIO2', value: lastRow.TIO2_EUR }
     ]);
 
     // Resinas KPI
@@ -635,8 +635,8 @@ function updateKPIs() {
 
     // Frete Importação KPI (CORRIGIDO)
     updateKPIBox('freteImportKPI', [
-        { label: 'Europa', value: lastRow.CNT_EU_EUR || 0 },
-        { label: 'China', value: lastRow.CNT_CN_USD || 0 }
+        { label: 'EU', value: lastRow.CNT_EU_EUR || 0 },
+        { label: 'CN', value: lastRow.CNT_CN_USD || 0 }
     ]);
 
     // Frete Exportação KPI (CORRIGIDO)
