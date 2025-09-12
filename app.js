@@ -59,38 +59,38 @@ const chartColors = {
     beige: '#F5F5DC'
 };
 
-// Configuração das séries para cada gráfico - COM LABELS CORRIGIDOS
+// Configuração das séries para cada gráfico - COM LABELS CORRIGIDOS E EIXOS DEFINIDOS
 const chartSeriesConfig = {
     'celulose': [
-        { field: 'Celulose_EUR', label: 'EUR', color: '#B34A3A' },
-        { field: 'Celulose_USD', label: 'USD', color: '#CD853F' }
+        { field: 'Celulose_USD', label: 'USD', color: '#CD853F', yAxisID: 'y' },  // Eixo primário
+        { field: 'Celulose_EUR', label: 'EUR', color: '#B34A3A', yAxisID: 'y1' }  // Eixo secundário
     ],
     'tio2': [
-        { field: 'TIO2_EUR', label: 'EUR', color: '#4A148C' }
+        { field: 'TIO2_EUR', label: 'EUR', color: '#4A148C', yAxisID: 'y' }
     ],
     'insumos': [
-        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513' },
-        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23' },
-        { field: 'Metanol_USD', label: 'MET', color: '#708090' }
+        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23', yAxisID: 'y' },      // Eixo primário
+        { field: 'Metanol_USD', label: 'MET', color: '#708090', yAxisID: 'y' },    // Eixo primário
+        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513', yAxisID: 'y1' }   // Eixo secundário
     ],
     'resinas': [
-        { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A' },
-        { field: 'Resina_MF_BRL', label: 'MF', color: '#8B4513' },
-        { field: 'USDBRL_GPC', label: 'GPC', color: '#4A148C' }
+        { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A', yAxisID: 'y' },   // Eixo primário
+        { field: 'Resina_MF_BRL', label: 'MF', color: '#8B4513', yAxisID: 'y' },   // Eixo primário
+        { field: 'USDBRL_GPC', label: 'GPC', color: '#4A148C', yAxisID: 'y1' }     // Eixo secundário
     ],
     'moedas': [
-        { field: 'USDBRL', label: 'USD', color: '#708090' },
-        { field: 'EURBRL', label: 'EUR', color: '#B34A3A' },
-        { field: 'CNYBRL', label: 'CNY', color: '#CD853F' }
+        { field: 'USDBRL', label: 'USD', color: '#708090', yAxisID: 'y' },         // Eixo primário
+        { field: 'EURBRL', label: 'EUR', color: '#B34A3A', yAxisID: 'y' },         // Eixo primário
+        { field: 'CNYBRL', label: 'CNY', color: '#CD853F', yAxisID: 'y1' }         // Eixo secundário
     ],
     'freteimport': [
-        { field: 'CNT_EU_EUR', label: 'Europa', color: '#4A148C' },
-        { field: 'CNT_CN_USD', label: 'China', color: '#8B4513' }
+        { field: 'CNT_EU_EUR', label: 'Europa', color: '#4A148C', yAxisID: 'y' },   // Eixo primário
+        { field: 'CNT_CN_USD', label: 'China', color: '#8B4513', yAxisID: 'y1' }    // Eixo secundário
     ],
     'freteexport': [
-        { field: 'CNT_GQ_USD', label: 'GQ', color: '#6B8E23' },
-        { field: 'CNT_CG_USD', label: 'CG', color: '#8B4513' },
-        { field: 'CNT_VC_USD', label: 'VC', color: '#B34A3A' }
+        { field: 'CNT_GQ_USD', label: 'GQ', color: '#6B8E23', yAxisID: 'y' },
+        { field: 'CNT_CG_USD', label: 'CG', color: '#8B4513', yAxisID: 'y' },
+        { field: 'CNT_VC_USD', label: 'VC', color: '#B34A3A', yAxisID: 'y' }
     ]
 };
 
@@ -369,9 +369,14 @@ function processFile(file) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
 
-            // Assumir que os dados estão na primeira planilha
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
+            // Procurar pela planilha "Final" ou usar a primeira
+            let worksheet;
+            if (workbook.SheetNames.includes('Final')) {
+                worksheet = workbook.Sheets['Final'];
+            } else {
+                const firstSheetName = workbook.SheetNames[0];
+                worksheet = workbook.Sheets[firstSheetName];
+            }
 
             // Converter para JSON
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
@@ -383,6 +388,9 @@ function processFile(file) {
             // Processar os dados
             globalData = processData(jsonData);
             filteredData = [...globalData];
+
+            // Atualizar campos de data com o período dos dados
+            updateDateFilterPlaceholders();
 
             // Atualizar a interface
             updateAllCharts();
@@ -409,7 +417,85 @@ function processFile(file) {
     reader.readAsArrayBuffer(file);
 }
 
-// --- Funções de Criação de Gráficos ---
+// FUNÇÃO PARA CARREGAR database.xlsx AUTOMATICAMENTE
+function loadDatabaseFile() {
+    fetch('./database.xlsx')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('database.xlsx não encontrado');
+            }
+            return response.arrayBuffer();
+        })
+        .then(data => {
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Procurar pela planilha "Final" ou usar a primeira
+            let worksheet;
+            if (workbook.SheetNames.includes('Final')) {
+                worksheet = workbook.Sheets['Final'];
+            } else {
+                const firstSheetName = workbook.SheetNames[0];
+                worksheet = workbook.Sheets[firstSheetName];
+            }
+
+            // Converter para JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length > 0) {
+                // Processar os dados
+                globalData = processData(jsonData);
+                filteredData = [...globalData];
+
+                // Atualizar campos de data com o período dos dados
+                updateDateFilterPlaceholders();
+
+                // Atualizar a interface
+                updateAllCharts();
+                updateAllMetrics();
+                updateKPIs();
+
+                console.log('database.xlsx carregado automaticamente:', globalData.length, 'registros');
+            } else {
+                throw new Error('database.xlsx está vazio');
+            }
+        })
+        .catch(error => {
+            console.log('database.xlsx não encontrado, usando dados de exemplo:', error.message);
+            // Usar dados de exemplo se o arquivo não for encontrado
+            globalData = processData(sampleData);
+            filteredData = [...globalData];
+
+            // Atualizar campos de data com o período dos dados de exemplo
+            updateDateFilterPlaceholders();
+
+            updateAllCharts();
+            updateAllMetrics();
+            updateKPIs();
+        });
+}
+
+// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA
+function updateDateFilterPlaceholders() {
+    if (globalData.length === 0) return;
+
+    const startDate = globalData[0].Data;
+    const endDate = globalData[globalData.length - 1].Data;
+
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (startDateInput) {
+        startDateInput.placeholder = formatDateBR(startDate);
+        startDateInput.title = `Dados disponíveis a partir de ${formatDateBR(startDate)}`;
+    }
+
+    if (endDateInput) {
+        endDateInput.placeholder = formatDateBR(endDate);
+        endDateInput.title = `Dados disponíveis até ${formatDateBR(endDate)}`;
+    }
+}
+
+// --- Funções de Criação de Gráficos COM DOIS EIXOS ---
 function createLineChart(chartId, seriesData) {
     const ctx = document.getElementById(chartId);
     if (!ctx) return;
@@ -418,6 +504,9 @@ function createLineChart(chartId, seriesData) {
     if (charts[chartId]) {
         charts[chartId].destroy();
     }
+
+    // Verificar se há séries com eixo secundário
+    const hasSecondaryAxis = seriesData.some(series => series.yAxisID === 'y1');
 
     // Preparar datasets
     const datasets = seriesData.map(series => ({
@@ -429,8 +518,45 @@ function createLineChart(chartId, seriesData) {
         borderColor: series.color,
         backgroundColor: series.color + '20',
         tension: 0.4,
-        fill: false
+        fill: false,
+        yAxisID: series.yAxisID || 'y'
     }));
+
+    // Configuração das escalas
+    const scales = {
+        x: {
+            type: 'category',
+            title: {
+                display: true,
+                text: 'Data'
+            }
+        },
+        y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+                display: true,
+                text: 'Valor'
+            }
+        }
+    };
+
+    // Adicionar eixo secundário se necessário
+    if (hasSecondaryAxis) {
+        scales.y1 = {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+                display: true,
+                text: 'Valor (Eixo 2)'
+            },
+            grid: {
+                drawOnChartArea: false,
+            },
+        };
+    }
 
     // Criar novo gráfico
     charts[chartId] = new Chart(ctx, {
@@ -443,27 +569,14 @@ function createLineChart(chartId, seriesData) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
+                    display: true,  // LEGENDA HABILITADA
                     position: 'top',
                 },
                 title: {
                     display: false
                 }
             },
-            scales: {
-                x: {
-                    type: 'category',
-                    title: {
-                        display: true,
-                        text: 'Data'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Valor'
-                    }
-                }
-            }
+            scales: scales
         }
     });
 }
@@ -497,7 +610,7 @@ function updateAllMetrics() {
     });
 }
 
-// --- Funções de KPI ---
+// --- Funções de KPI CORRIGIDAS ---
 function updateKPIs() {
     if (filteredData.length === 0) return;
 
@@ -520,19 +633,17 @@ function updateKPIs() {
         { label: 'MF', value: lastRow.Resina_MF_BRL }
     ]);
 
-    // Moedas KPI
-    updateKPIBox('moedasKPI', [
-        { label: 'USD', value: lastRow.USDBRL },
-        { label: 'EUR', value: lastRow.EURBRL }
+    // Frete Importação KPI (CORRIGIDO)
+    updateKPIBox('freteImportKPI', [
+        { label: 'Europa', value: lastRow.CNT_EU_EUR || 0 },
+        { label: 'China', value: lastRow.CNT_CN_USD || 0 }
     ]);
 
-    // Frete KPI (valores médios dos últimos dados válidos)
-    const freteImportValue = (lastRow.CNT_EU_EUR || 0) + (lastRow.CNT_CN_USD || 0);
-    const freteExportValue = (lastRow.CNT_GQ_USD || 0) + (lastRow.CNT_CG_USD || 0) + (lastRow.CNT_VC_USD || 0);
-
-    updateKPIBox('freteKPI', [
-        { label: 'Import', value: freteImportValue > 0 ? freteImportValue / 2 : 0 },
-        { label: 'Export', value: freteExportValue > 0 ? freteExportValue / 3 : 0 }
+    // Frete Exportação KPI (CORRIGIDO)
+    const freteExportValue = ((lastRow.CNT_GQ_USD || 0) + (lastRow.CNT_CG_USD || 0) + (lastRow.CNT_VC_USD || 0)) / 3;
+    updateKPIBox('freteExportKPI', [
+        { label: 'Média', value: freteExportValue },
+        { label: 'GQ', value: lastRow.CNT_GQ_USD || 0 }
     ]);
 }
 
@@ -603,23 +714,13 @@ function applyDateFilters() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard inicializado');
 
-    // Carregar dados de exemplo
-    globalData = processData(sampleData);
-    filteredData = [...globalData];
-
     // Configurar filtros de data
     setupDateFilters();
 
-    // Criar gráficos iniciais
-    updateAllCharts();
+    // Tentar carregar database.xlsx primeiro, depois dados de exemplo
+    loadDatabaseFile();
 
-    // Atualizar métricas
-    updateAllMetrics();
-
-    // Atualizar KPIs
-    updateKPIs();
-
-    console.log('Dashboard pronto com', globalData.length, 'registros de exemplo');
+    console.log('Dashboard pronto');
 });
 
 // --- Exposição de funções globais para o HTML ---
