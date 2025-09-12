@@ -226,31 +226,26 @@ function getMetricClass(value) {
 function calculatePeriodMetrics(data, field) {
     if (!data || data.length === 0) return { period: null, ytd: null, mom: null };
 
-    // Filtrar dados válidos (não nulos, não zero, não undefined)
-    const validData = data.filter(d => d[field] != null && d[field] !== 0 && !isNaN(d[field]));
-
-    if (validData.length === 0) return { period: null, ytd: null, mom: null };
-
-    // Período: primeiro vs último dos dados válidos
-    const firstValue = validData[0][field];
-    const lastValue = validData[validData.length - 1][field];
+    // Período: primeiro vs último do filtro
+    const firstValue = data[0][field];
+    const lastValue = data[data.length - 1][field];
     const period = calculatePercentageChange(firstValue, lastValue);
 
-    // YTD: primeiro valor do ano corrente vs último valor (apenas dados válidos)
+    // YTD: primeiro valor do ano corrente vs último valor
     const currentYear = new Date().getFullYear();
-    const ytdValidData = validData.filter(d => d.Data.getFullYear() === currentYear);
+    const ytdData = data.filter(d => d.Data.getFullYear() === currentYear);
     let ytd = null;
 
-    if (ytdValidData.length > 1) {
-        const firstYtdValue = ytdValidData[0][field];
-        const lastYtdValue = ytdValidData[ytdValidData.length - 1][field];
+    if (ytdData.length > 1) {
+        const firstYtdValue = ytdData[0][field];
+        const lastYtdValue = ytdData[ytdData.length - 1][field];
         ytd = calculatePercentageChange(firstYtdValue, lastYtdValue);
     }
 
-    // MOM: penúltimo vs último valor (apenas dados válidos)
+    // MOM: penúltimo vs último valor
     let mom = null;
-    if (validData.length > 1) {
-        const secondLastValue = validData[validData.length - 2][field];
+    if (data.length > 1) {
+        const secondLastValue = data[data.length - 2][field];
         mom = calculatePercentageChange(secondLastValue, lastValue);
     }
 
