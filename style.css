@@ -466,7 +466,6 @@ transform: translateY(-2px);
 .kpi-header h3 {
 font-size: var(--font-size-lg);
 color: var(--color-text);
-text-align: center;
 margin: 0;
 }
 
@@ -481,9 +480,7 @@ background: var(--color-secondary);
 border-radius: var(--radius-base);
 padding: var(--space-6) var(--space-12);
 display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
+align-items: baseline;
 gap: var(--space-4);
 transition: background var(--duration-fast) var(--ease-standard);
 }
