@@ -295,6 +295,7 @@ function updateChartMetrics(chartType) {
 
     // Header com os nomes das séries
     metricsHTML += '<div class="metrics-header">';
+    metricsHTML += '<div></div>';
     seriesConfig.forEach(series => {
         metricsHTML += `<div class="series-header">${series.label}</div>`;
     });
