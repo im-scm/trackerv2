@@ -1,9 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+    var senha = prompt("Digite a senha para acessar:");
+    if (senha !== "impress25") {
+        alert("Senha incorreta. Você não pode acessar esta página.");
+        document.body.innerHTML = ""; // Esconde o conteúdo
+    }
+});
+</script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Monitoramento - Impress Decor</title>
+    <title>Painel de Monitoramento - SCM Impress Decor</title>
     <!-- Remover referência ao favicon temporariamente -->
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css">
