@@ -580,10 +580,6 @@ text-align: center;
 text-transform: uppercase;
 letter-spacing: 0.05em;
 padding: var(--space-4);
-display: flex;
-justify-content: center;
-align-items: center;
-width: 100%;
 }
 
 .metric-row {
