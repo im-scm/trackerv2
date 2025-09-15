@@ -475,23 +475,26 @@ function loadDatabaseFile() {
         });
 }
 
-// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA
+// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA - at 15/09
 function updateDateFilterPlaceholders() {
     if (globalData.length === 0) return;
-
-    const startDate = globalData[0].Data;
-    const endDate = globalData[globalData.length - 1].Data;
-
+    // Sempre fixa o start em 01/01/2024
+    const startDate = new Date(2024, 0, 1); // Janeiro é mês 0 em JS!
+    // Busca a maior data da base (garantia maior)
+    const endDate = globalData
+        .map(x => x.Data)
+        .filter(d => d instanceof Date && !isNaN(d))
+        .reduce((a, b) => (a > b ? a : b), new Date(2024, 0, 1));
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
-
     if (startDateInput) {
         startDateInput.placeholder = formatDateBR(startDate);
+        startDateInput.value = formatDateBR(startDate); // <-- valor inicial!
         startDateInput.title = `Dados disponíveis a partir de ${formatDateBR(startDate)}`;
     }
-
     if (endDateInput) {
         endDateInput.placeholder = formatDateBR(endDate);
+        endDateInput.value = formatDateBR(endDate); // <-- valor inicial!
         endDateInput.title = `Dados disponíveis até ${formatDateBR(endDate)}`;
     }
 }
