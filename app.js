@@ -526,6 +526,10 @@ function createLineChart(chartId, seriesData) {
         yAxisID: series.yAxisID || 'y'
     }));
 
+    // DESCOBRIR CORES DOS EIXOS
+    const yAxisColor = seriesData.find(s => s.yAxisID === 'y')?.color || '#708090';  
+    const y1AxisColor = seriesData.find(s => s.yAxisID === 'y1')?.color || '#B34A3A';
+    
     // Configuração das escalas
     const scales = {
         x: {
@@ -542,10 +546,15 @@ function createLineChart(chartId, seriesData) {
             title: {
                 display: false,
                 text: 'Valor'
+            },
+            ticks: {
+                color: yAxisColor
+            },
+            grid: {
+                color: yAxisColor + '40'
             }
         }
     };
-
     // Adicionar eixo secundário se necessário
     if (hasSecondaryAxis) {
         scales.y1 = {
@@ -556,8 +565,12 @@ function createLineChart(chartId, seriesData) {
                 display: false,
                 text: 'Valor (Eixo 2)'
             },
+            ticks: {
+                color: y1AxisColor
+            },
             grid: {
                 drawOnChartArea: false,
+                color: y1AxisColor + '40'
             },
         };
     }
@@ -699,9 +712,13 @@ function applyDateFilters() {
         endDate = parseDateBR(endDateStr);
     }
 
-    // Aplicar filtro
-    if (startDate || endDate) {
+    // CORREÇÃO: Sempre aplicar filtro quando houver datas
+    if (startDate && endDate) {
         filteredData = filterDataByDate(globalData, startDate, endDate);
+    } else if (startDate) {
+        filteredData = globalData.filter(row => row.Data >= startDate);
+    } else if (endDate) {
+        filteredData = globalData.filter(row => row.Data <= endDate);
     } else {
         filteredData = [...globalData];
     }
