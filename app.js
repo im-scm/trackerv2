@@ -475,7 +475,7 @@ function loadDatabaseFile() {
         });
 }
 
-// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA - at 15/09
+// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA
 function updateDateFilterPlaceholders() {
     if (globalData.length === 0) return;
     // Sempre fixa o start em 01/01/2024
@@ -489,12 +489,18 @@ function updateDateFilterPlaceholders() {
     const endDateInput = document.getElementById('endDate');
     if (startDateInput) {
         startDateInput.placeholder = formatDateBR(startDate);
-        startDateInput.value = formatDateBR(startDate); // <-- valor inicial!
+        // Apenas define o valor se estiver vazio (para não sobrescrever escolha do usuário)
+        if (!startDateInput.value) {
+            startDateInput.value = formatDateBR(startDate); // <-- valor inicial!
+        }
         startDateInput.title = `Dados disponíveis a partir de ${formatDateBR(startDate)}`;
     }
     if (endDateInput) {
         endDateInput.placeholder = formatDateBR(endDate);
-        endDateInput.value = formatDateBR(endDate); // <-- valor inicial!
+        // Apenas define o valor se estiver vazio
+        if (!endDateInput.value) {
+            endDateInput.value = formatDateBR(endDate); // <-- valor inicial!
+        }
         endDateInput.title = `Dados disponíveis até ${formatDateBR(endDate)}`;
     }
 }
