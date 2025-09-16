@@ -30,7 +30,7 @@ const sampleData = [
         Celulose_EUR: "1.295,20",
         Celulose_USD: "1.390,15",
         TIO2_EUR: "3.450,00",
-        Melamina_USD: "1.760,30",
+        amina_USD: "1.760,30",
         Ureia_USD: "642,15",
         Metanol_USD: "458,90",
         Resina_UF_BRL: "3.012,00",
@@ -69,9 +69,9 @@ const chartSeriesConfig = {
         { field: 'TIO2_EUR', label: 'TIO2', color: '#4A148C', yAxisID: 'y' }
     ],
     'insumos': [
-        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23', yAxisID: 'y' },      // Eixo primário
-        { field: 'Metanol_USD', label: 'MET', color: '#708090', yAxisID: 'y' },    // Eixo primário
-        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513', yAxisID: 'y1' }   // Eixo secundário
+        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513', yAxisID: 'y' }   // Eixo primário
+        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23', yAxisID: 'y1' },      // Eixo secundário
+        { field: 'Metanol_USD', label: 'MET', color: '#708090', yAxisID: 'y1' },    // Eixo secundário
     ],
     'resinas': [
         { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A', yAxisID: 'y' },   // Eixo primário
@@ -522,18 +522,19 @@ function createLineChart(chartId, seriesData) {
     const hasSecondaryAxis = seriesData.some(series => series.yAxisID === 'y1');
 
     // Preparar datasets
-    const datasets = seriesData.map(series => ({
-        label: series.label,
-        data: filteredData.map(row => ({
-            x: formatDateBR(row.Data),
-            y: row[series.field]
-        })),
-        borderColor: series.color,
-        backgroundColor: series.color + '20',
-        tension: 0.4,
-        fill: false,
-        yAxisID: series.yAxisID || 'y'
-    }));
+   const datasets = seriesData.map(series => ({
+    label: series.label,
+    data: filteredData.map(row => ({
+        x: formatDateBR(row.Data),
+        y: row[series.field]
+    })),
+    borderColor: series.color,
+    backgroundColor: series.color + '20',
+    tension: 0.4,
+    fill: false,
+    yAxisID: series.yAxisID || 'y',
+    borderDash: series.field === 'USDBRL_GPC' ? [8, 4] : undefined // linha tracejada só para USDBRL_GPC
+}));
 
     // DESCOBRIR CORES DOS EIXOS
     const yAxisColor = seriesData.find(s => s.yAxisID === 'y')?.color || '#708090';  
