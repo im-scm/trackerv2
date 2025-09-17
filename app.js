@@ -532,8 +532,7 @@ function createLineChart(chartId, seriesData) {
     backgroundColor: series.color + '20',
     tension: 0.4,
     fill: false,
-    yAxisID: series.yAxisID || 'y',
-    borderDash: series.field === 'USDBRL_GPC' ? [8, 4] : undefined // linha tracejada só para USDBRL_GPC
+    yAxisID: series.yAxisID || 'y'
 }));
 
     // DESCOBRIR CORES DOS EIXOS
