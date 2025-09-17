@@ -30,7 +30,7 @@ const sampleData = [
         Celulose_EUR: "1.295,20",
         Celulose_USD: "1.390,15",
         TIO2_EUR: "3.450,00",
-        amina_USD: "1.760,30",
+        Melamina_USD: "1.760,30",
         Ureia_USD: "642,15",
         Metanol_USD: "458,90",
         Resina_UF_BRL: "3.012,00",
