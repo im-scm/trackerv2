@@ -69,9 +69,9 @@ const chartSeriesConfig = {
         { field: 'TIO2_EUR', label: 'TIO2', color: '#4A148C', yAxisID: 'y' }
     ],
     'insumos': [
-        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513', yAxisID: 'y' }   // Eixo primário
-        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23', yAxisID: 'y1' },      // Eixo secundário
-        { field: 'Metanol_USD', label: 'MET', color: '#708090', yAxisID: 'y1' },    // Eixo secundário
+        { field: 'Ureia_USD', label: 'URE', color: '#6B8E23', yAxisID: 'y' },      // Eixo primário
+        { field: 'Metanol_USD', label: 'MET', color: '#708090', yAxisID: 'y' },    // Eixo primário
+        { field: 'Melamina_USD', label: 'MEL', color: '#8B4513', yAxisID: 'y1' }   // Eixo secundário
     ],
     'resinas': [
         { field: 'Resina_UF_BRL', label: 'UF', color: '#B34A3A', yAxisID: 'y' },   // Eixo primário
@@ -392,7 +392,7 @@ function processFile(file) {
 
             // Atualizar campos de data com o período dos dados
             updateDateFilterPlaceholders();
-            
+
             // Atualizar a interface
             updateAllCharts();
             updateAllMetrics();
@@ -449,7 +449,7 @@ function loadDatabaseFile() {
 
                 // Atualizar campos de data com o período dos dados
                 updateDateFilterPlaceholders();
-                
+
                 // Atualizar a interface
                 updateAllCharts();
                 updateAllMetrics();
@@ -468,14 +468,14 @@ function loadDatabaseFile() {
 
             // Atualizar campos de data com o período dos dados de exemplo
             updateDateFilterPlaceholders();
-            
+
             updateAllCharts();
             updateAllMetrics();
             updateKPIs();
         });
 }
 
-// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA
+// FUNÇÃO PARA ATUALIZAR OS PLACEHOLDERS DOS FILTROS DE DATA - at 15/09
 function updateDateFilterPlaceholders() {
     if (globalData.length === 0) return;
     // Sempre fixa o start em 01/01/2024
@@ -489,18 +489,12 @@ function updateDateFilterPlaceholders() {
     const endDateInput = document.getElementById('endDate');
     if (startDateInput) {
         startDateInput.placeholder = formatDateBR(startDate);
-        // Apenas define o valor se estiver vazio (para não sobrescrever escolha do usuário)
-        if (!startDateInput.value) {
-            startDateInput.value = formatDateBR(startDate); // <-- valor inicial!
-        }
+        startDateInput.value = formatDateBR(startDate); // <-- valor inicial!
         startDateInput.title = `Dados disponíveis a partir de ${formatDateBR(startDate)}`;
     }
     if (endDateInput) {
         endDateInput.placeholder = formatDateBR(endDate);
-        // Apenas define o valor se estiver vazio
-        if (!endDateInput.value) {
-            endDateInput.value = formatDateBR(endDate); // <-- valor inicial!
-        }
+        endDateInput.value = formatDateBR(endDate); // <-- valor inicial!
         endDateInput.title = `Dados disponíveis até ${formatDateBR(endDate)}`;
     }
 }
@@ -519,29 +513,25 @@ function createLineChart(chartId, seriesData) {
     const hasSecondaryAxis = seriesData.some(series => series.yAxisID === 'y1');
 
     // Preparar datasets
-   const datasets = seriesData.map(series => ({
-    label: series.label,
-    data: filteredData.map(row => ({
-        x: formatDateBR(row.Data),
-        y: row[series.field]
-    })),
-    borderColor: series.color,
-    backgroundColor: series.color + '20',
-    tension: 0.4,
-    fill: false,
-    yAxisID: series.yAxisID || 'y'
-}));
+    const datasets = seriesData.map(series => ({
+        label: series.label,
+        data: filteredData.map(row => ({
+            x: formatDateBR(row.Data),
+            y: row[series.field]
+        })),
+        borderColor: series.color,
+        backgroundColor: series.color + '20',
+        tension: 0.4,
+        fill: false,
+        yAxisID: series.yAxisID || 'y'
+    }));
 
-    // DESCOBRIR CORES DOS EIXOS
-    const yAxisColor = seriesData.find(s => s.yAxisID === 'y')?.color || '#708090';  
-    const y1AxisColor = seriesData.find(s => s.yAxisID === 'y1')?.color || '#B34A3A';
-    
     // Configuração das escalas
     const scales = {
         x: {
             type: 'category',
             title: {
-                display: false,
+                display: true,
                 text: 'Data'
             }
         },
@@ -550,17 +540,12 @@ function createLineChart(chartId, seriesData) {
             display: true,
             position: 'left',
             title: {
-                display: false,
+                display: true,
                 text: 'Valor'
-            },
-            ticks: {
-                color: yAxisColor
-            },
-            grid: {
-                color: yAxisColor + '40'
             }
         }
     };
+
     // Adicionar eixo secundário se necessário
     if (hasSecondaryAxis) {
         scales.y1 = {
@@ -568,15 +553,11 @@ function createLineChart(chartId, seriesData) {
             display: true,
             position: 'right',
             title: {
-                display: false,
+                display: true,
                 text: 'Valor (Eixo 2)'
-            },
-            ticks: {
-                color: y1AxisColor
             },
             grid: {
                 drawOnChartArea: false,
-                color: y1AxisColor + '40'
             },
         };
     }
@@ -718,13 +699,9 @@ function applyDateFilters() {
         endDate = parseDateBR(endDateStr);
     }
 
-    // CORREÇÃO: Sempre aplicar filtro quando houver datas
-    if (startDate && endDate) {
+    // Aplicar filtro
+    if (startDate || endDate) {
         filteredData = filterDataByDate(globalData, startDate, endDate);
-    } else if (startDate) {
-        filteredData = globalData.filter(row => row.Data >= startDate);
-    } else if (endDate) {
-        filteredData = globalData.filter(row => row.Data <= endDate);
     } else {
         filteredData = [...globalData];
     }

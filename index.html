@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+    var senha = prompt("Digite a senha para acessar:");
+    if (senha !== "impress25") {
+        alert("Senha incorreta. Você não pode acessar esta página.");
+        document.body.innerHTML = ""; // Esconde o conteúdo
+    }
+});
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Monitoramento - SCM Impress Decor</title>
+    <title>Painel de Monitoramento - SCM Impress Decor</title>
     <link rel="icon" href="im.ico" type="image/x-icon" /> 
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,7 +23,7 @@
     <div class="container">
         <header class="header">
             <div class="header-content">
-                <h1>Dashboard de Monitoramento v2.2</h1>
+                <h1>Dashboard de Monitoramento</h1>
                 <!-- Logo removido temporariamente para evitar erro 404 -->
                 <!-- <img src="impress_logo.jpg" alt="Impress Decor" class="company-logo"> -->
             </div>
