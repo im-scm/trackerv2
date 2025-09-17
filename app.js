@@ -534,7 +534,7 @@ function createLineChart(chartId, seriesData) {
         x: {
             type: 'category',
             title: {
-                display: true,
+                display: false,
                 text: 'Data'
             }
         },
@@ -543,7 +543,7 @@ function createLineChart(chartId, seriesData) {
             display: true,
             position: 'left',
             title: {
-                display: true,
+                display: false,
                 text: 'Valor'
             }
         }
@@ -556,7 +556,7 @@ function createLineChart(chartId, seriesData) {
             display: true,
             position: 'right',
             title: {
-                display: true,
+                display: false,
                 text: 'Valor (Eixo 2)'
             },
             grid: {
