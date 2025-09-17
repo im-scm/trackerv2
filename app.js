@@ -392,8 +392,7 @@ function processFile(file) {
 
             // Atualizar campos de data com o período dos dados
             updateDateFilterPlaceholders();
-            applyDateFilters();
-
+            
             // Atualizar a interface
             updateAllCharts();
             updateAllMetrics();
@@ -450,8 +449,7 @@ function loadDatabaseFile() {
 
                 // Atualizar campos de data com o período dos dados
                 updateDateFilterPlaceholders();
-                applyDateFilters();
-
+                
                 // Atualizar a interface
                 updateAllCharts();
                 updateAllMetrics();
@@ -470,8 +468,7 @@ function loadDatabaseFile() {
 
             // Atualizar campos de data com o período dos dados de exemplo
             updateDateFilterPlaceholders();
-            applyDateFilters();
-
+            
             updateAllCharts();
             updateAllMetrics();
             updateKPIs();
